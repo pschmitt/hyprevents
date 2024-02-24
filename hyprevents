@@ -2,9 +2,10 @@
 
 usage() {
   cat <<EOF
-Usage: hyprevents -f|--file <event_handler> [options...]
+Usage: $(basename "$0") -f|--file EVENT_HANDLER [options...]
 
 Options:
+  -f, --file    event handler file
   -h, --help    show this message
   -k, --kill    kill already started event handler
   -r, --reload  reload already started event handler
@@ -74,5 +75,4 @@ then
           EXEC:"$EVENT_LOADER $VERBOSE $EVENT_FILE",nofork
       ;;
   esac
-
 fi
