@@ -28,6 +28,10 @@ event_closewindow() {
   : # WINDOWADDRESS
 }
 
+event_configreloaded() {
+  : #
+}
+
 event_createworkspace() {
   : # WORKSPACENAME
 }
