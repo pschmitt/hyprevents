@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 EVENT_HANDLER="$(dirname "$0")/event_handler"
 
 # Load the default (empty) event implementations
 . "$EVENT_HANDLER"
 
-PFS=$IFS
+PFS="$IFS"
 
 load_events() {
     IFS=$PFS
@@ -35,7 +35,8 @@ while true; do
         edata="${event_data#"$event">>}"
 
         IFS=','
-        set -- "$edata"
+        # shellcheck disable=SC2086
+        set -- $edata
         IFS=$PFS
 
         if [ -n "$verbose" ]; then
