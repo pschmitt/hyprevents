@@ -59,7 +59,8 @@ then
       if [[ -n "$VERBOSE" ]]
       then
         printf >&2 '[%s] ($*: %s) 1:%s 2:%s 3:%s 4:%s\n' \
-          "$EVENT_NAME" "$*" "$1" "$2" "$3" "$4"
+          "$EVENT_NAME" "${*:-N/A}" \
+          "${1:-N/A}" "${2:-N/A}" "${3:-N/A}" "${4:-N/A}"
       fi
 
       case "$EVENT_NAME" in
