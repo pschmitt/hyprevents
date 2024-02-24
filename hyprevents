@@ -5,15 +5,13 @@ usage() {
 Usage: $(basename "$0") --file EVENT_HANDLER [options...]
 
 Options:
-  -f, --file    event handler file
-  -h, --help    show this message
-  -k, --kill    kill already started event handler
-  -r, --reload  reload already started event handler
-  -v, --verbose show more output
+  -f, --file FILE  event handler file
+  -h, --help       show this message
+  -k, --kill       kill already started event handler
+  -r, --reload     reload already started event handler
+  -v, --verbose    show more output
 EOF
 }
-
-EVENT_LOADER="$(dirname "$0")/event_loader"
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
 then
@@ -59,6 +57,13 @@ then
     exit 2
   fi
 
+  if [[ ! -r "$EVENT_FILE" ]]
+  then
+    echo "Event handler not found: $EVENT_FILE" >&2
+    exit 2
+  fi
+
+  EVENT_LOADER="$(dirname "$0")/event_loader"
   SELF="${EVENT_LOADER}.*${EVENT_FILE}"
 
   case "$ACTION" in
