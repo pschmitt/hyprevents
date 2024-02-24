@@ -1,62 +1,78 @@
 #!/usr/bin/env bash
 
 usage() {
-    cat <<EOF
-- Handle hyprland events
-
+  cat <<EOF
 Usage: hyprevents -f|--file <event_handler> [options...]
 
 Options:
-  -h, --help        show help message
-  -k, --kill        kill already started event handler
-  -r, --reload      reload already started event handler
+  -h, --help    show this message
+  -k, --kill    kill already started event handler
+  -r, --reload  reload already started event handler
+  -v, --verbose show more output
 EOF
 }
 
 EVENT_LOADER="$(dirname "$0")/event_loader"
 
-argparse() {
-    local args=$(getopt -a -n hyprevents \
-                        -o hf:kr \
-                        --long help,file:,kill,reload -- "$@")
-
-    [[ $? != 0 ]] && usage && exit
-    eval set -- "$args"
-
-    KILL=0
-    RELOAD=0
-    while :; do
-        case "$1" in
-            -h | --help)
-                usage;
-                exit ;;
-            -f | --file)
-                shift;
-                EVENT_FILE=$1
-                ;;
-            -k | --kill)
-                KILL=1
-                ;;
-            -r | --reload)
-                RELOAD=1
-                ;;
-            --)
-                shift;
-                break ;;
-            *)
-                echo "Unexpected option: $1";
-                usage;
-                exit ;;
-        esac
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
+then
+  while [[ -n $* ]]
+  do
+    case "$1" in
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -f|--file)
+        EVENT_FILE="$2"
+        shift 2
+        ;;
+      -k|--kill|--exit)
+        ACTION="kill"
         shift
-    done
-}
+        ;;
+      -r|--reload)
+        ACTION="reload"
+        shift
+        ;;
+      -v|--verbose)
+        VERBOSE="--verbose"
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        echo "Unknown option: $1" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
 
-argparse "$0" "$@"
+  if [[ -z "$EVENT_FILE" ]]
+  then
+    echo "Event handler not provided." >&2
+    usage >&2
+    exit 2
+  fi
 
-[ -z "$EVENT_FILE" ] && echo "Event handler not provided." && usage && exit
-[ $KILL == 1 ] && pkill -f "$EVENT_LOADER $EVENT_FILE" && exit
-[ $RELOAD == 1 ] && pkill -USR1 -f "$EVENT_LOADER $EVENT_FILE" && exit
+  SELF="${EVENT_LOADER}.*${EVENT_FILE}"
+  case "$ACTION" in
+    kill)
+      pkill -f "$SELF"
+      exit "$?"
+      ;;
+    reload)
+      pkill -USR1 -f "$SELF"
+      exit "$?"
+      ;;
+    *)
+      HYPRLAND_SOCKET="${TMPDIR:-/tmp}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
+      socat -u "UNIX-CONNECT:${HYPRLAND_SOCKET}" \
+          EXEC:"$EVENT_LOADER $VERBOSE $EVENT_FILE",nofork
+      ;;
+  esac
 
-socat -u UNIX-CONNECT:"/tmp/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock" \
-         EXEC:"$EVENT_LOADER $EVENT_FILE",nofork
+fi

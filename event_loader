@@ -1,69 +1,133 @@
 #!/usr/bin/env bash
 
-EVENT_HANDLER="$(dirname "$0")/event_handler"
-
 # Load the default (empty) event implementations
-. "$EVENT_HANDLER"
+EVENT_HANDLER="$(dirname "$0")/event_handler"
+# shellcheck disable=SC1090
+source "$EVENT_HANDLER"
 
-PFS="$IFS"
-
-load_events() {
-    IFS=$PFS
-    for f in $event_files; do
-        if . "$f"; then
-            printf >&2 'loaded event file: %s\n' "$f"
-        else
-            printf >&2 'failed sourcing event file: %s\n' "$f"
-            exit 2
-        fi
-    done
+load_event_files() {
+  local f
+	for f in "$@"
+  do
+    # shellcheck disable=SC1090
+		if source "$f"
+    then
+			printf 'loaded event file: %s\n' "$f" >&2
+		else
+			printf 'failed sourcing event file: %s\n' "$f" >&2
+			exit 2
+		fi
+	done
 }
 
-verbose=
-case "$1" in
-    -v) verbose=1 && shift ;;
-esac
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
+then
+  VERBOSE="${VERBOSE:-}"
 
-event_files="$*"
-load_events
+  while [[ -n $* ]]
+  do
+    case "$1" in
+      -v|--verbose)
+        VERBOSE=1
+        shift
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
 
-trap 'load_events; continue' USR1
+  load_event_files "$@"
 
-while true; do
-    if read -r event_data; then
-        event="${event_data%%>>*}"
-        edata="${event_data#"$event">>}"
+  # FIXME Do we need the continue here?
+  trap 'load_event_files "$@"; continue' USR1
 
-        IFS=','
-        # shellcheck disable=SC2086
-        set -- $edata
-        IFS=$PFS
+  while :
+  do
+    if read -r EVENT_MSG
+    then
+      EVENT_NAME="${EVENT_MSG%%>>*}"
+      EVENT_DATA="${EVENT_MSG#"$EVENT_NAME">>}"
 
-        if [ -n "$verbose" ]; then
-            printf >&2 '[%s] 1:%s 2:%s 3:%s 4:%s\n' "$event" "$1" "$2" "$3" "$4"
-        fi
+      PFS="$IFS"
+      IFS=','
+      # shellcheck disable=SC2086
+      set -- $EVENT_DATA
+      IFS="$PFS"
 
-        case "$event" in
-            "activelayout") KEYBOARDNAME="$1" LAYOUTNAME="$2" event_activelayout ;;
-            "activewindow") WINDOWCLASS="$1" WINDOWTITLE="$2" event_activewindow ;;
-            "activewindowv2") WINDOWADDRESS="$1" event_activewindowv2 ;;
-            "closelayer") NAMESPACE="$1" event_closelayer ;;
-            "closewindow") WINDOWADDRESS="$1" event_closewindow ;;
-            "createworkspace") WORKSPACENAME="$1" event_createworkspace ;;
-            "destroyworkspace") WORKSPACENAME="$1" event_destroyworkspace ;;
-            "focusedmon") MONNAME="$1" WORKSPACENAME="$2" event_focusedmon ;;
-            "fullscreen") ENTER="$1" event_fullscreen ;;
-            "monitoradded") MONITORNAME="$1" event_monitoradded ;;
-            "monitorremoved") MONITORNAME="$1" event_monitorremoved ;;
-            "movewindow") WINDOWADDRESS="$1" WORKSPACENAME="$2" event_movewindow ;;
-            "moveworkspace") WORKSPACENAME="$1" MONNAME="$2" event_moveworkspace ;;
-            "openlayer") NAMESPACE="$1" event_openlayer ;;
-            "openwindow") WINDOWADDRESS="$1" WORKSPACENAME="$2" WINDOWCLASS="$3" WINDOWTITLE="$4" event_openwindow ;;
-            "screencast") STATE="$1" OWNER="$2" event_screencast ;;
-            "submap") SUBMAPNAME="$1" event_submap ;;
-            "windowtitle") WINDOWADDRESS="$1" event_windowtitle ;;
-            "workspace") WORKSPACENAME="$1" event_workspace ;;
-            *) printf >&2 'Unknown event: %s\n' "$event" ;;
-        esac
+      if [[ -n "$VERBOSE" ]]
+      then
+        printf >&2 '[%s] ($*: %s) 1:%s 2:%s 3:%s 4:%s\n' \
+          "$EVENT_NAME" "$*" "$1" "$2" "$3" "$4"
+      fi
+
+      case "$EVENT_NAME" in
+        "activelayout")
+          KEYBOARDNAME="$1" LAYOUTNAME="$2" event_activelayout
+          ;;
+        "activewindow")
+          WINDOWCLASS="$1" WINDOWTITLE="$2" event_activewindow
+          ;;
+        "activewindowv2")
+          WINDOWADDRESS="$1" event_activewindowv2
+          ;;
+        "closelayer")
+          NAMESPACE="$1" event_closelayer
+          ;;
+        "closewindow")
+          WINDOWADDRESS="$1" event_closewindow
+          ;;
+        "createworkspace")
+          WORKSPACENAME="$1" event_createworkspace
+          ;;
+        "destroyworkspace")
+          WORKSPACENAME="$1" event_destroyworkspace
+          ;;
+        "focusedmon")
+          MONNAME="$1" WORKSPACENAME="$2" event_focusedmon
+          ;;
+        "fullscreen")
+          ENTER="$1" event_fullscreen
+          ;;
+        "monitoradded")
+          MONITORNAME="$1" event_monitoradded
+          ;;
+        "monitorremoved")
+          MONITORNAME="$1" event_monitorremoved
+          ;;
+        "movewindow")
+          WINDOWADDRESS="$1" WORKSPACENAME="$2" event_movewindow
+          ;;
+        "moveworkspace")
+          WORKSPACENAME="$1" MONNAME="$2" event_moveworkspace
+          ;;
+        "openlayer")
+          NAMESPACE="$1" event_openlayer
+          ;;
+        "openwindow")
+          WINDOWADDRESS="$1" \
+          WORKSPACENAME="$2" \
+          WINDOWCLASS="$3" \
+          WINDOWTITLE="$4" \
+            event_openwindow
+          ;;
+        "screencast")
+          STATE="$1" OWNER="$2" event_screencast
+          ;;
+        "submap")
+          SUBMAPNAME="$1" event_submap
+          ;;
+        "windowtitle")
+          WINDOWADDRESS="$1" event_windowtitle
+          ;;
+        "workspace")
+          WORKSPACENAME="$1" event_workspace
+          ;;
+        *)
+          printf 'Unknown event: %s (data: %s)\n' \
+            "$EVENT_NAME" "$EVENT_DATA" >&2
+          ;;
+      esac
     fi
-done
+  done
+fi
