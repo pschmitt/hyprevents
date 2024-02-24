@@ -37,10 +37,11 @@ then
     esac
   done
 
-  load_event_files "$@"
+  EVENT_FILES=("$@")
+  load_event_files "${EVENT_FILES[@]}"
 
   # FIXME Do we need the continue here?
-  trap 'load_event_files "$@"; continue' USR1
+  trap 'load_event_files "${EVENT_FILES[@]}"; continue' USR1
 
   while :
   do
