@@ -80,6 +80,10 @@ event_submap() {
   : # SUBMAPNAME
 }
 
+event_urgent() {
+  : # WINDOWADDRESS
+}
+
 event_windowtitle() {
   : # WINDOWADDRESS
 }

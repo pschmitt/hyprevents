@@ -122,6 +122,9 @@ then
         submap)
           SUBMAPNAME="$1" event_submap
           ;;
+        urgent)
+          WINDOWADDRESS="$1" event_urgent
+          ;;
         windowtitle)
           WINDOWADDRESS="$1" event_windowtitle
           ;;
