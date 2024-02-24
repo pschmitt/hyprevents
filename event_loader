@@ -63,65 +63,65 @@ then
       fi
 
       case "$EVENT_NAME" in
-        "activelayout")
+        activelayout)
           KEYBOARDNAME="$1" LAYOUTNAME="$2" event_activelayout
           ;;
-        "activewindow")
+        activewindow)
           WINDOWCLASS="$1" WINDOWTITLE="$2" event_activewindow
           ;;
-        "activewindowv2")
+        activewindowv2)
           WINDOWADDRESS="$1" event_activewindowv2
           ;;
-        "closelayer")
+        closelayer)
           NAMESPACE="$1" event_closelayer
           ;;
-        "closewindow")
+        closewindow)
           WINDOWADDRESS="$1" event_closewindow
           ;;
-        "createworkspace")
+        createworkspace)
           WORKSPACENAME="$1" event_createworkspace
           ;;
-        "destroyworkspace")
+        destroyworkspace)
           WORKSPACENAME="$1" event_destroyworkspace
           ;;
-        "focusedmon")
+        focusedmon)
           MONNAME="$1" WORKSPACENAME="$2" event_focusedmon
           ;;
-        "fullscreen")
+        fullscreen)
           ENTER="$1" event_fullscreen
           ;;
-        "monitoradded")
+        monitoradded)
           MONITORNAME="$1" event_monitoradded
           ;;
-        "monitorremoved")
+        monitorremoved)
           MONITORNAME="$1" event_monitorremoved
           ;;
-        "movewindow")
+        movewindow)
           WINDOWADDRESS="$1" WORKSPACENAME="$2" event_movewindow
           ;;
-        "moveworkspace")
+        moveworkspace)
           WORKSPACENAME="$1" MONNAME="$2" event_moveworkspace
           ;;
-        "openlayer")
+        openlayer)
           NAMESPACE="$1" event_openlayer
           ;;
-        "openwindow")
+        openwindow)
           WINDOWADDRESS="$1" \
           WORKSPACENAME="$2" \
           WINDOWCLASS="$3" \
           WINDOWTITLE="$4" \
             event_openwindow
           ;;
-        "screencast")
+        screencast)
           STATE="$1" OWNER="$2" event_screencast
           ;;
-        "submap")
+        submap)
           SUBMAPNAME="$1" event_submap
           ;;
-        "windowtitle")
+        windowtitle)
           WINDOWADDRESS="$1" event_windowtitle
           ;;
-        "workspace")
+        workspace)
           WORKSPACENAME="$1" event_workspace
           ;;
         *)
