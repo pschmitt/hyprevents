@@ -2,7 +2,7 @@
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") -f|--file EVENT_HANDLER [options...]
+Usage: $(basename "$0") --file EVENT_HANDLER [options...]
 
 Options:
   -f, --file    event handler file
