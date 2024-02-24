@@ -28,7 +28,7 @@ then
         EVENT_FILE="$2"
         shift 2
         ;;
-      -k|--kill|--exit)
+      -k|--kill|--exit|--quit|--stop)
         ACTION="kill"
         shift
         ;;
@@ -60,6 +60,7 @@ then
   fi
 
   SELF="${EVENT_LOADER}.*${EVENT_FILE}"
+
   case "$ACTION" in
     kill)
       pkill -f "$SELF"
