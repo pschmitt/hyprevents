@@ -13,6 +13,11 @@ Options:
 EOF
 }
 
+hyprland_instance_signature() {
+  find "${XDG_RUNTIME_DIR}/hypr" -iname '.socket2.sock' -exec \
+    sh -c 'nc -zU "$1" 2>/dev/null && basename "$(dirname "$1")"' -- {} \;
+}
+
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
 then
   while [[ -n $* ]]
@@ -63,6 +68,7 @@ then
     exit 2
   fi
 
+  XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/${UID:-$(id -u)}}
   EVENT_LOADER="$(dirname "$0")/event_loader"
   SELF="${EVENT_LOADER}.*${EVENT_FILE}"
 
@@ -76,6 +82,13 @@ then
       exit "$?"
       ;;
     *)
+      HYPRLAND_INSTANCE_SIGNATURE=${HYPRLAND_INSTANCE_SIGNATURE:-$(hyprland_instance_signature)}
+      if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]
+      then
+        echo "Error: HYPRLAND_INSTANCE_SIGNATURE is empty. Can't determine path to socket." >&2
+        exit 1
+      fi
+
       HYPRLAND_SOCKET="${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
       socat -u "UNIX-CONNECT:${HYPRLAND_SOCKET}" \
           EXEC:"$EVENT_LOADER $VERBOSE $EVENT_FILE",nofork
