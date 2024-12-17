@@ -64,6 +64,14 @@ event_moveworkspace() {
   : # WORKSPACENAME MONNAME
 }
 
+event_premonitoradded() {
+  : # MONITORNAME
+}
+
+event_premonitorremoved() {
+  : # MONITORNAME
+}
+
 event_openlayer() {
   : # NAMESPACE
 }
