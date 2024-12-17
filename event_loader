@@ -116,6 +116,12 @@ then
           WINDOWTITLE="$4" \
             event_openwindow
           ;;
+        premonitoradded)
+          MONITORNAME="$1" event_premonitoradded
+          ;;
+        premonitorremoved)
+          MONITORNAME="$1" event_premonitorremoved
+          ;;
         screencast)
           STATE="$1" OWNER="$2" event_screencast
           ;;
